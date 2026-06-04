@@ -1,0 +1,14 @@
+stop_number,address,customer_name,package_weight_lbs,delivery_priority
+0,1801 S Lamar Blvd Austin TX 78704,Lamar Pharmacy Depot,0,DEPOT
+1,1946 Aldrich St Austin TX 78723,Robert Nguyen,2.0,urgent
+2,7301 Shoal Creek Blvd Austin TX 78757,Barbara Martinez,1.5,standard
+3,400 W 2nd St Austin TX 78701,Christopher Lee,3.0,urgent
+4,1208 S Congress Ave Austin TX 78704,Diane Walker,1.0,standard
+5,4801 Bull Creek Rd Austin TX 78731,Frank Patel,2.5,standard
+6,2300 E Cesar Chavez St Austin TX 78702,Gloria Jimenez,1.5,urgent
+7,5305 Airport Blvd Austin TX 78751,Howard Kim,2.0,standard
+8,2222 E Riverside Dr Austin TX 78741,Irene Thompson,3.5,urgent
+9,1700 W Rundberg Ln Austin TX 78758,Jason Rodriguez,1.0,standard
+10,1900 Barton Springs Rd Austin TX 78704,Karen Wilson,2.0,standard
+11,4040 Duval St Austin TX 78751,Louis Brown,1.5,urgent
+12,3267 Bee Cave Rd Austin TX 78746,Michelle Davis,2.5,standard

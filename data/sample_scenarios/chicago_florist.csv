@@ -1,0 +1,17 @@
+stop_number,address,customer_name,package_weight_lbs,delivery_notes
+0,2158 N Milwaukee Ave Chicago IL 60647,Logan Square Flowers Depot,0,DEPOT
+1,3600 N Clark St Chicago IL 60613,Sarah Kowalski,4.5,Leave at door - fragile
+2,1724 W Division St Chicago IL 60622,Marco Delgado,6.0,Ring doorbell twice
+3,5240 N Clark St Chicago IL 60640,Karen Andersen,3.5,Signature required
+4,1500 S Michigan Ave Chicago IL 60605,James Thornton,8.0,Call ahead - office building
+5,840 N Wabash Ave Chicago IL 60611,Elena Russo,5.5,Leave with concierge
+6,2430 N Lincoln Ave Chicago IL 60614,Patrick O'Brien,4.0,Backyard gate code 1492
+7,3940 N Pulaski Rd Chicago IL 60641,Maria Hernandez,7.0,Leave at side entrance
+8,1600 N Milwaukee Ave Chicago IL 60647,David Chen,3.0,Neighbor can accept: unit 2B
+9,4756 N Ravenswood Ave Chicago IL 60640,Anna Petrov,9.5,Second floor apartment
+10,3200 W Chicago Ave Chicago IL 60651,Darnell Williams,6.5,Call on arrival
+11,1056 W Bryn Mawr Ave Chicago IL 60660,Tomas Novak,4.0,Leave with building manager
+12,3150 N Broadway Chicago IL 60657,Rachel Goldstein,5.0,Do not leave unattended
+13,7000 N Sheridan Rd Chicago IL 60626,Ingrid Larsson,2.5,Buzzer code 312
+14,1200 S Wabash Ave Chicago IL 60605,Victor Okafor,11.0,Business hours only 9am-5pm
+15,1800 S Racine Ave Chicago IL 60608,Carmen Reyes,7.5,Leave at restaurant back entrance

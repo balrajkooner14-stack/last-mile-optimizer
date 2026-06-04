@@ -1,0 +1,22 @@
+stop_number,address,customer_name,package_weight_lbs,order_value_usd
+0,315 Flatbush Ave Brooklyn NY 11217,Park Slope Grocery Depot,0,0.00
+1,150 Hicks St Brooklyn NY 11201,Margaret Sullivan,22.0,87.45
+2,50 Bridge St Brooklyn NY 11201,Andre Moreau,15.5,62.30
+3,420 Court St Brooklyn NY 11231,Sofia Esposito,28.0,103.20
+4,270 Atlantic Ave Brooklyn NY 11201,Kwame Asante,18.5,74.80
+5,450 Flatbush Ave Brooklyn NY 11215,Yuki Tanaka,31.0,118.60
+6,600 Vanderbilt Ave Brooklyn NY 11238,Priya Sharma,24.0,95.15
+7,1430 Bedford Ave Brooklyn NY 11216,Darius Jackson,19.5,78.40
+8,1000 Fulton St Brooklyn NY 11238,Natasha Petrova,27.0,108.75
+9,600 Knickerbocker Ave Brooklyn NY 11221,Carlos Mendoza,21.0,84.30
+10,350 Bedford Ave Brooklyn NY 11211,Leah Cohen,16.0,65.90
+11,900 Manhattan Ave Brooklyn NY 11222,Pawel Wisnewski,33.0,124.50
+12,2100 Church Ave Brooklyn NY 11226,Abena Osei,26.0,101.80
+13,1800 Coney Island Ave Brooklyn NY 11230,David Greenberg,20.5,82.20
+14,4902 13th Ave Brooklyn NY 11219,Rachel Horowitz,29.0,112.40
+15,7210 5th Ave Brooklyn NY 11209,Antonio Ferrara,23.5,93.60
+16,5224 4th Ave Brooklyn NY 11220,Min-Ji Park,17.0,69.75
+17,1200 Surf Ave Brooklyn NY 11224,Jerome Baptiste,34.5,138.20
+18,1620 Rockaway Pkwy Brooklyn NY 11236,Fatima Al-Hassan,25.0,99.50
+19,2202 Atlantic Ave Brooklyn NY 11233,Tyrone Brooks,30.0,119.80
+20,1050 New York Ave Brooklyn NY 11212,Valentina Cruz,22.5,90.10
