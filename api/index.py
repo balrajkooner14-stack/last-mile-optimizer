@@ -168,14 +168,16 @@ async def optimize(req: OptimizeRequest):
             )
 
             # --- Stage 3: VRP Solve ---
-            yield _event("solving", "Running OR-Tools VRP optimizer...")
+            # Adaptive time limit: ~1s per stop, floor 10s, cap 55s (Vercel limit)
+            vrp_time_limit = max(10, min(55, len(valid_locations) - 1))
+            yield _event("solving", f"Running OR-Tools VRP optimizer (time limit: {vrp_time_limit}s)...")
 
             vrp_result = await asyncio.to_thread(
                 solve_vrp,
                 matrix_result["distance_matrix"],
                 req.num_vehicles,
-                0,    # depot_index
-                55,   # time_limit_seconds — never lower (Vercel 60s cap)
+                0,
+                vrp_time_limit,
                 matrix_result["duration_matrix"],
             )
 
