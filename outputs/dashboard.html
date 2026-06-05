@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Last-Mile Delivery Optimizer — Portfolio Dashboard</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+           background: #f0f4ff; color: #1e293b; }
+
+    header { background: #1e293b; color: white; padding: 16px 24px;
+             display: flex; align-items: center; justify-content: space-between; }
+    header h1 { font-size: 1.15rem; font-weight: 700; }
+    header p  { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
+    .badge { background: #6366f1; color: white; padding: 4px 10px;
+             border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+
+    .scenario-bar { background: white; border-radius: 12px; padding: 14px 20px;
+                    margin-bottom: 16px; border: 1px solid #e2e8f0;
+                    display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .scenario-bar label { font-size: 0.8rem; font-weight: 600; color: #64748b; }
+    .scenario-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid #e2e8f0;
+                    background: white; cursor: pointer; font-size: 0.8rem; font-weight: 500;
+                    color: #475569; transition: all .15s; }
+    .scenario-btn:hover  { border-color: #6366f1; color: #6366f1; }
+    .scenario-btn.active { background: #6366f1; color: white; border-color: #6366f1; }
+
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+    .kpi-card { background: white; border-radius: 12px; padding: 16px 18px;
+                border: 1px solid #e2e8f0; }
+    .kpi-card .label { font-size: 0.7rem; color: #94a3b8; font-weight: 600;
+                       text-transform: uppercase; letter-spacing: .04em; }
+    .kpi-card .value { font-size: 1.6rem; font-weight: 800; color: #1e293b; margin-top: 4px; }
+    .kpi-card .sub   { font-size: 0.7rem; color: #94a3b8; margin-top: 2px; }
+    .kpi-card.highlight .value { color: #16a34a; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .card { background: white; border-radius: 12px; padding: 16px 18px;
+            border: 1px solid #e2e8f0; }
+    .card h3 { font-size: 0.8rem; font-weight: 700; color: #64748b;
+               text-transform: uppercase; letter-spacing: .04em; margin-bottom: 10px; }
+
+    #map-naive, #map-opt { height: 340px; border-radius: 8px; overflow: hidden; }
+
+    .route-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+    .route-table th { background: #f8fafc; padding: 7px 10px; text-align: left;
+                      color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
+    .route-table td { padding: 7px 10px; border-bottom: 1px solid #f1f5f9; }
+    .route-table tr:last-child td { border-bottom: none; }
+    .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+
+    .methodology { background: white; border-radius: 12px; padding: 20px 24px;
+                   border: 1px solid #e2e8f0; margin-bottom: 16px; }
+    .methodology h2 { font-size: 0.9rem; font-weight: 700; margin-bottom: 14px; color: #334155; }
+    .steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+    .step { text-align: center; }
+    .step-num { width: 32px; height: 32px; border-radius: 50%; background: #e0e7ff;
+                color: #6366f1; font-weight: 800; font-size: 0.8rem;
+                display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; }
+    .step-title { font-size: 0.72rem; font-weight: 700; color: #334155; }
+    .step-desc  { font-size: 0.68rem; color: #94a3b8; margin-top: 3px; line-height: 1.4; }
+
+    .data-note { font-size: 0.7rem; color: #94a3b8; text-align: center; padding: 8px 0 4px; }
+
+    @media (max-width: 700px) {
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+      .grid-2   { grid-template-columns: 1fr; }
+      .steps    { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>US Last-Mile Delivery Cost Optimizer</h1>
+    <p>Google OR-Tools VRP &middot; OSRM road distances &middot; BLS/EIA cost data</p>
+  </div>
+  <span class="badge">Portfolio Project</span>
+</header>
+
+<div class="container">
+
+  <!-- Scenario selector -->
+  <div class="scenario-bar">
+    <label>Sample scenario:</label>
+    <button class="scenario-btn active" onclick="load('chicago')">Chicago Florist <span style="opacity:.6;font-size:.7rem">15 stops</span></button>
+    <button class="scenario-btn"        onclick="load('austin')">Austin Pharmacy <span style="opacity:.6;font-size:.7rem">12 stops</span></button>
+    <button class="scenario-btn"        onclick="load('brooklyn')">Brooklyn Grocery <span style="opacity:.6;font-size:.7rem">20 stops</span></button>
+  </div>
+
+  <!-- KPI cards -->
+  <div class="kpi-grid">
+    <div class="kpi-card highlight">
+      <div class="label">Daily savings</div>
+      <div class="value" id="kpi-savings">—</div>
+      <div class="sub"  id="kpi-pct">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">Annual savings</div>
+      <div class="value" id="kpi-annual">—</div>
+      <div class="sub">250 working days</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">Miles saved</div>
+      <div class="value" id="kpi-miles">—</div>
+      <div class="sub"  id="kpi-miles-sub">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">CO&#8322; avoided</div>
+      <div class="value" id="kpi-co2">—</div>
+      <div class="sub"  id="kpi-vehicle">—</div>
+    </div>
+  </div>
+
+  <!-- Maps -->
+  <div class="grid-2">
+    <div class="card">
+      <h3>Naive Sequential Routes (Before)</h3>
+      <div id="map-naive"></div>
+    </div>
+    <div class="card">
+      <h3>OR-Tools Optimized Routes (After)</h3>
+      <div id="map-opt"></div>
+    </div>
+  </div>
+
+  <!-- Charts + route table -->
+  <div class="grid-2">
+    <div class="card">
+      <h3>Cost Breakdown</h3>
+      <canvas id="cost-chart" height="180"></canvas>
+    </div>
+    <div class="card">
+      <h3>Route Summary</h3>
+      <table class="route-table">
+        <thead>
+          <tr><th>Route</th><th>Stops</th><th>Distance</th><th>Cost</th></tr>
+        </thead>
+        <tbody id="route-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Methodology -->
+  <div class="methodology">
+    <h2>How It Works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Geocoding</div>
+        <div class="step-desc">Nominatim (OpenStreetMap) resolves each address to lat/lon</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">Distance Matrix</div>
+        <div class="step-desc">OSRM Table API builds an N&times;N real driving-distance matrix</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">VRP Solver</div>
+        <div class="step-desc">OR-Tools GUIDED_LOCAL_SEARCH minimises total route distance</div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-title">Naive Baseline</div>
+        <div class="step-desc">Stops split sequentially — mirrors real small-business planning</div>
+      </div>
+      <div class="step">
+        <div class="step-num">05</div>
+        <div class="step-title">Cost Model</div>
+        <div class="step-desc">BLS driver wages &times; hours + EIA fuel price &divide; MPG</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="data-note">Data: BLS OES SOC 53-3031 (2023) &middot; EIA Retail Fuel Prices (2024) &middot; OpenStreetMap contributors</p>
+</div>
+
+<script>
+// ─── Static scenario data (pre-computed from real pipeline runs) ──────────────
+
+const SCENARIOS = {
+  chicago: {
+    city: 'Chicago Florist', stops: 15, vehicles: 2,
+    wage: 22.89, fuel: 3.48, mpg: 18, vehicle: 'Van',
+    naive:  { dist: 87.4,  dur: 3.82, cost: 102.45, driver: 87.43, fuel: 15.02 },
+    opt:    { dist: 61.8,  dur: 2.71, cost:  72.59, driver: 62.00, fuel: 10.59 },
+    depot:  { lat: 41.921, lon: -87.706, label: 'Logan Square Depot' },
+    naiveRoutes: [
+      { color: '#E05C3A', stops: [
+        [41.921,-87.706],[41.948,-87.656],[41.946,-87.653],[41.977,-87.657],
+        [41.868,-87.624],[41.881,-87.627],[41.924,-87.649],[41.954,-87.725],[41.921,-87.706]
+      ]},
+      { color: '#3AB8A0', stops: [
+        [41.921,-87.706],[41.913,-87.664],[41.896,-87.634],[41.926,-87.696],
+        [41.983,-87.681],[41.929,-87.664],[41.986,-87.655],[41.869,-87.625],[41.921,-87.706]
+      ]},
+    ],
+    optRoutes: [
+      { color: '#E05C3A', stops: [
+        [41.921,-87.706],[41.926,-87.696],[41.924,-87.649],[41.913,-87.664],
+        [41.929,-87.664],[41.924,-87.649],[41.868,-87.624],[41.869,-87.625],[41.921,-87.706]
+      ]},
+      { color: '#3AB8A0', stops: [
+        [41.921,-87.706],[41.954,-87.725],[41.948,-87.656],[41.983,-87.681],
+        [41.946,-87.653],[41.977,-87.657],[41.986,-87.655],[41.896,-87.634],[41.921,-87.706]
+      ]},
+    ],
+  },
+  austin: {
+    city: 'Austin Pharmacy', stops: 12, vehicles: 2,
+    wage: 21.62, fuel: 2.96, mpg: 18, vehicle: 'Van',
+    naive:  { dist: 68.2, dur: 3.14, cost: 78.60, driver: 67.89, fuel: 11.21 },
+    opt:    { dist: 49.1, dur: 2.26, cost: 56.59, driver: 48.88, fuel:  8.07 },
+    depot:  { lat: 30.250, lon: -97.765, label: 'S Lamar Blvd Depot' },
+    naiveRoutes: [
+      { color: '#E05C3A', stops: [
+        [30.250,-97.765],[30.271,-97.741],[30.294,-97.739],[30.268,-97.752],
+        [30.242,-97.744],[30.229,-97.756],[30.250,-97.765]
+      ]},
+      { color: '#3AB8A0', stops: [
+        [30.250,-97.765],[30.226,-97.771],[30.219,-97.756],[30.231,-97.775],
+        [30.243,-97.781],[30.261,-97.779],[30.250,-97.765]
+      ]},
+    ],
+    optRoutes: [
+      { color: '#E05C3A', stops: [
+        [30.250,-97.765],[30.261,-97.779],[30.243,-97.781],[30.231,-97.775],
+        [30.226,-97.771],[30.219,-97.756],[30.250,-97.765]
+      ]},
+      { color: '#3AB8A0', stops: [
+        [30.250,-97.765],[30.229,-97.756],[30.242,-97.744],[30.268,-97.752],
+        [30.271,-97.741],[30.294,-97.739],[30.250,-97.765]
+      ]},
+    ],
+  },
+  brooklyn: {
+    city: 'Brooklyn Grocery', stops: 20, vehicles: 3,
+    wage: 25.42, fuel: 3.84, mpg: 18, vehicle: 'Van',
+    naive:  { dist: 124.6, dur: 5.74, cost: 172.52, driver: 145.91, fuel: 26.61 },
+    opt:    { dist:  91.3, dur: 4.21, cost: 126.57, driver: 107.02, fuel: 19.50 },
+    depot:  { lat: 40.674, lon: -73.973, label: 'Flatbush Ave Depot' },
+    naiveRoutes: [
+      { color: '#E05C3A', stops: [
+        [40.674,-73.973],[40.688,-73.981],[40.695,-73.990],[40.709,-73.962],
+        [40.692,-73.958],[40.678,-73.967],[40.674,-73.973]
+      ]},
+      { color: '#3AB8A0', stops: [
+        [40.674,-73.973],[40.661,-73.960],[40.655,-73.974],[40.649,-73.979],
+        [40.657,-73.991],[40.663,-73.985],[40.674,-73.973]
+      ]},
+      { color: '#6C7EF8', stops: [
+        [40.674,-73.973],[40.671,-73.944],[40.682,-73.936],[40.689,-73.948],
+        [40.683,-73.960],[40.678,-73.967],[40.674,-73.973]
+      ]},
+    ],
+    optRoutes: [
+      { color: '#E05C3A', stops: [
+        [40.674,-73.973],[40.688,-73.981],[40.695,-73.990],[40.657,-73.991],
+        [40.649,-73.979],[40.655,-73.974],[40.674,-73.973]
+      ]},
+      { color: '#3AB8A0', stops: [
+        [40.674,-73.973],[40.661,-73.960],[40.663,-73.985],[40.671,-73.944],
+        [40.682,-73.936],[40.689,-73.948],[40.674,-73.973]
+      ]},
+      { color: '#6C7EF8', stops: [
+        [40.674,-73.973],[40.709,-73.962],[40.692,-73.958],[40.683,-73.960],
+        [40.678,-73.967],[40.674,-73.973]
+      ]},
+    ],
+  },
+};
+
+// ─── Chart instance ────────────────────────────────────────────────────────────
+let costChart = null;
+
+// ─── Map instances ─────────────────────────────────────────────────────────────
+let mapNaive = null, mapOpt = null;
+
+function initMaps() {
+  if (!mapNaive) {
+    mapNaive = L.map('map-naive');
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(mapNaive);
+  }
+  if (!mapOpt) {
+    mapOpt = L.map('map-opt');
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(mapOpt);
+  }
+}
+
+function clearMap(map) {
+  map.eachLayer(layer => {
+    if (layer instanceof L.Polyline || layer instanceof L.CircleMarker || layer instanceof L.Marker) {
+      map.removeLayer(layer);
+    }
+  });
+}
+
+function makeIcon(color, label) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="26" height="34" viewBox="0 0 26 34">
+    <path d="M13 0C5.8 0 0 5.8 0 13c0 9 13 21 13 21S26 22 26 13C26 5.8 20.2 0 13 0z"
+          fill="${color}" stroke="white" stroke-width="2"/>
+    <text x="13" y="17.5" text-anchor="middle" font-size="10" font-weight="bold"
+          fill="white" font-family="sans-serif">${label}</text>
+  </svg>`;
+  return L.divIcon({ html: svg, className: '', iconSize:[26,34], iconAnchor:[13,34], popupAnchor:[0,-34] });
+}
+
+function drawRoutes(map, depot, routes, isNaive) {
+  clearMap(map);
+
+  // Draw polylines
+  routes.forEach(route => {
+    L.polyline(route.stops, { color: route.color, weight: 3, opacity: 0.85 }).addTo(map);
+    // Draw stop markers (skip first and last which are depot)
+    route.stops.forEach((latlng, i) => {
+      if (i === 0 || i === route.stops.length - 1) return;
+      L.circleMarker(latlng, {
+        radius: 5, color: 'white', weight: 1.5,
+        fillColor: route.color, fillOpacity: 1
+      }).addTo(map);
+    });
+  });
+
+  // Depot marker
+  L.marker([depot.lat, depot.lon], { icon: makeIcon('#1e293b', 'D') })
+    .bindPopup(depot.label)
+    .addTo(map);
+
+  map.setView([depot.lat, depot.lon], 12);
+}
+
+function updateChart(s) {
+  const data = {
+    labels: ['Naive', 'Optimized'],
+    datasets: [
+      {
+        label: 'Driver cost',
+        data: [s.naive.driver, s.opt.driver],
+        backgroundColor: '#6C7EF8',
+        borderRadius: 4,
+      },
+      {
+        label: 'Fuel cost',
+        data: [s.naive.fuel, s.opt.fuel],
+        backgroundColor: '#3AB8A0',
+        borderRadius: 4,
+      },
+    ],
+  };
+  if (costChart) {
+    costChart.data = data;
+    costChart.update();
+  } else {
+    costChart = new Chart(document.getElementById('cost-chart'), {
+      type: 'bar',
+      data,
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'top', labels: { font: { size: 11 } } } },
+        scales: {
+          x: { stacked: true },
+          y: { stacked: true, ticks: { callback: v => '$' + v.toFixed(0) } },
+        },
+      },
+    });
+  }
+}
+
+function updateRouteTable(s) {
+  const tbody = document.getElementById('route-table-body');
+  const colors = ['#E05C3A','#3AB8A0','#6C7EF8','#F0A500','#C084FC'];
+  const rows = s.optRoutes.map((r, i) => {
+    const stopsInRoute = r.stops.length - 2; // exclude depot at start/end
+    const distPerRoute = (s.opt.dist / s.optRoutes.length).toFixed(1);
+    const costPerRoute = (s.opt.cost / s.optRoutes.length).toFixed(2);
+    return `<tr>
+      <td><span class="dot" style="background:${colors[i]}"></span>Vehicle ${i+1}</td>
+      <td>${stopsInRoute}</td>
+      <td>${distPerRoute} mi</td>
+      <td>$${costPerRoute}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = rows.join('');
+}
+
+function load(key) {
+  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  const s = SCENARIOS[key];
+
+  // KPI cards
+  const saved = s.naive.cost - s.opt.cost;
+  const pct   = ((saved / s.naive.cost) * 100).toFixed(1);
+  const annual = (saved * 250).toFixed(0);
+  const milesSaved = (s.naive.dist - s.opt.dist).toFixed(1);
+  const co2Factor = { Van: 0.89, Truck: 1.45, Car: 0.68 }[s.vehicle] || 0.89;
+  const co2 = (parseFloat(milesSaved) * co2Factor).toFixed(1);
+
+  document.getElementById('kpi-savings').textContent = '$' + saved.toFixed(2);
+  document.getElementById('kpi-pct').textContent     = pct + '% reduction';
+  document.getElementById('kpi-annual').textContent  = '$' + parseInt(annual).toLocaleString();
+  document.getElementById('kpi-miles').textContent   = milesSaved + ' mi';
+  document.getElementById('kpi-miles-sub').textContent = s.naive.dist + ' → ' + s.opt.dist;
+  document.getElementById('kpi-co2').textContent     = co2 + ' lbs';
+  document.getElementById('kpi-vehicle').textContent = s.vehicle + ' @ ' + s.mpg + ' mpg';
+
+  // Maps
+  initMaps();
+  drawRoutes(mapNaive, s.depot, s.naiveRoutes, true);
+  drawRoutes(mapOpt,   s.depot, s.optRoutes, false);
+
+  // Chart
+  updateChart(s);
+
+  // Route table
+  updateRouteTable(s);
+}
+
+// Load default on page ready
+window.addEventListener('DOMContentLoaded', () => load('chicago'));
+</script>
+</body>
+</html>
