@@ -102,8 +102,8 @@ app/page.tsx — main page, 4 sections:
 
 ## Deployment
 - Platform: Vercel (Hobby free tier)
-- GitHub repo: [TO BE FILLED after setup]
-- Live URL: [TO BE FILLED after deployment]
+- GitHub repo: https://github.com/balrajkooner14-stack/last-mile-optimizer
+- Live URL: https://last-mile-optimizer.vercel.app
 
 ## Sample scenarios (in /data/sample_scenarios/)
 - chicago_florist.csv    — 15-stop flower delivery, Chicago IL

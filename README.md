@@ -2,7 +2,7 @@
 
 A full-stack web application that solves the **Vehicle Routing Problem (VRP)** for small-business delivery routes across US cities — and quantifies the dollar savings of optimization over naive sequential routing.
 
-**Live demo:** _[link added after deployment]_
+**Live demo:** https://last-mile-optimizer.vercel.app
 
 ---
 
